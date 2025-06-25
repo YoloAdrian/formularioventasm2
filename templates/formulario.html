@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Predicción de Ventas</title>
+    <script>
+      function predictSales(event) {
+        event.preventDefault();
+        const data = new URLSearchParams(new FormData(event.target));
+        fetch('/predict', { method: 'POST', body: data })
+          .then(res => res.json())
+          .then(json => {
+            const out = json.error
+              ? 'Error: ' + json.error
+              : `Pred RF: ${json.rfr_prediction} | Pred MLP: ${json.mlp_prediction}`;
+            document.getElementById('resultado').innerText = out;
+          })
+          .catch(err => { document.getElementById('resultado').innerText = 'Error en la solicitud.'; });
+      }
+    </script>
+</head>
+<body>
+  <h1>Formulario de Predicción de Ventas</h1>
+  <form onsubmit="predictSales(event)">
+    <!-- Numéricas básicas -->
+    <label>Quantity: <input type="number" step="any" name="Quantity" required></label><br>
+    <label>Discount: <input type="number" step="any" name="Discount" required></label><br>
+    <label>Profit: <input type="number" step="any" name="Profit" required></label><br><br>
+
+    <!-- Fechas para shipping_delay -->
+    <label>Order Date: <input type="date" name="Order_Date" required></label><br>
+    <label>Ship Date:  <input type="date" name="Ship_Date"  required></label><br><br>
+
+    <!-- Select para Sub-Category -->
+    <label>Sub-Category:
+      <select name="Sub-Category" required>
+        <option value="Binders">Binders</option>
+        <option value="Paper">Paper</option>
+        <option value="Furnishings">Furnishings</option>
+        <option value="Phones">Phones</option>
+        <option value="Storage">Storage</option>
+        <option value="Art">Art</option>
+        <option value="Accessories">Accessories</option>
+        <option value="Chairs">Chairs</option>
+        <option value="Appliances">Appliances</option>
+        <option value="Labels">Labels</option>
+        <option value="Tables">Tables</option>
+        <option value="Envelopes">Envelopes</option>
+        <option value="Bookcases">Bookcases</option>
+        <option value="Fasteners">Fasteners</option>
+        <option value="Supplies">Supplies</option>
+        <option value="Machines">Machines</option>
+        <option value="Copiers">Copiers</option>
+      </select>
+    </label><br><br>
+
+    <!-- Select para Category -->
+    <label>Category:
+      <select name="Category" required>
+        <option value="Office Supplies">Office Supplies</option>
+        <option value="Furniture">Furniture</option>
+        <option value="Technology">Technology</option>
+      </select>
+    </label><br><br>
+
+    <!-- Select para Segment -->
+    <label>Segment:
+      <select name="Segment" required>
+        <option value="Consumer">Consumer</option>
+        <option value="Corporate">Corporate</option>
+        <option value="Home Office">Home Office</option>
+      </select>
+    </label><br><br>
+
+    <button type="submit">Predecir</button>
+  </form>
+  <p id="resultado"></p>
+</body>
+</html>
