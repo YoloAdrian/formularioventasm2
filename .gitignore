@@ -1,0 +1,26 @@
+# Ignorar todo
+*
+
+# Pero no ignores esta carpeta y archivo específico
+!formularioventas/
+!formularioventas/model_rfr.pkl
+
+
+# Entorno virtual
+.venv/
+
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Checkpoints de Jupyter
+.ipynb_checkpoints/
+
+# Variables de entorno
+.env
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
