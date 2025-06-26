@@ -1,39 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta charset="utf-8">
-    <title>Predicción de Ventas</title>
-    <script>
-      function predictSales(event) {
-        event.preventDefault();
-        const data = new URLSearchParams(new FormData(event.target));
-        fetch('/predict', { method: 'POST', body: data })
-          .then(res => res.json())
-          .then(json => {
-            const out = json.error
-              ? 'Error: ' + json.error
-              : `Pred RF: ${json.rfr_prediction} | Pred MLP: ${json.mlp_prediction}`;
-            document.getElementById('resultado').innerText = out;
-          })
-          .catch(err => { document.getElementById('resultado').innerText = 'Error en la solicitud.'; });
-      }
-    </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Predicción de Ventas</title>
+  <style>
+    /* Reset básico */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f6fc;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      padding: 30px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: #1a73e8;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+    input[type="number"],
+    input[type="date"],
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 4px;
+      margin-bottom: 16px;
+      border: 1px solid #ccdbea;
+      border-radius: 4px;
+      font-size: 1rem;
+      background-color: #f9fbfd;
+      color: #333;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #1a73e8;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #1669c1;
+    }
+    #resultado {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-align: center;
+      color: #1a73e8;
+    }
+  </style>
 </head>
 <body>
-  <h1>Formulario de Predicción de Ventas</h1>
-  <form onsubmit="predictSales(event)">
-    <!-- Numéricas básicas -->
-    <label>Quantity: <input type="number" step="any" name="Quantity" required></label><br>
-    <label>Discount: <input type="number" step="any" name="Discount" required></label><br>
-    <label>Profit: <input type="number" step="any" name="Profit" required></label><br><br>
+  <div class="card">
+    <h1>Prediccion ventas</h1>
+    <form id="sales-form">
+      <label for="Quantity">Quantity</label>
+      <input type="number" step="any" name="Quantity" id="Quantity" required>
 
-    <!-- Fechas para shipping_delay -->
-    <label>Order Date: <input type="date" name="Order_Date" required></label><br>
-    <label>Ship Date:  <input type="date" name="Ship_Date"  required></label><br><br>
+      <label for="Discount">Discount</label>
+      <input type="number" step="any" name="Discount" id="Discount" required>
 
-    <!-- Select para Sub-Category -->
-    <label>Sub-Category:
-      <select name="Sub-Category" required>
+      <label for="Profit">Profit</label>
+      <input type="number" step="any" name="Profit" id="Profit" required>
+
+      <label for="Order_Date">Order Date</label>
+      <input type="date" name="Order_Date" id="Order_Date" required>
+
+      <label for="Ship_Date">Ship Date</label>
+      <input type="date" name="Ship_Date" id="Ship_Date" required>
+
+      <label for="SubCategory">Sub-Category</label>
+      <select name="Sub-Category" id="SubCategory" required>
         <option value="Binders">Binders</option>
         <option value="Paper">Paper</option>
         <option value="Furnishings">Furnishings</option>
@@ -52,28 +113,43 @@
         <option value="Machines">Machines</option>
         <option value="Copiers">Copiers</option>
       </select>
-    </label><br><br>
 
-    <!-- Select para Category -->
-    <label>Category:
-      <select name="Category" required>
+      <label for="Category">Category</label>
+      <select name="Category" id="Category" required>
         <option value="Office Supplies">Office Supplies</option>
         <option value="Furniture">Furniture</option>
         <option value="Technology">Technology</option>
       </select>
-    </label><br><br>
 
-    <!-- Select para Segment -->
-    <label>Segment:
-      <select name="Segment" required>
+      <label for="Segment">Segment</label>
+      <select name="Segment" id="Segment" required>
         <option value="Consumer">Consumer</option>
         <option value="Corporate">Corporate</option>
         <option value="Home Office">Home Office</option>
       </select>
-    </label><br><br>
 
-    <button type="submit">Predecir</button>
-  </form>
-  <p id="resultado"></p>
+      <button type="submit">Predecir</button>
+    </form>
+    <p id="resultado"></p>
+  </div>
+
+  <script>
+    document.getElementById('sales-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const data = new URLSearchParams(new FormData(this));
+      fetch('/predict', { method: 'POST', body: data })
+        .then(res => res.json())
+        .then(json => {
+          if (json.error) {
+            document.getElementById('resultado').innerText = 'Error: ' + json.error;
+          } else {
+            document.getElementById('resultado').innerText = `Pred RF: ${json.rfr_prediction}`;
+          }
+        })
+        .catch(() => {
+          document.getElementById('resultado').innerText = 'Error en la solicitud.';
+        });
+    });
+  </script>
 </body>
 </html>
